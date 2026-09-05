@@ -70,6 +70,52 @@ services:
       retries: 10
       start_period: 10s
 
+  office:
+    build:
+      context: ./office
+    container_name: regatta-office
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-office:5432/${OFFICE_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${OFFICE_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${OFFICE_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-office:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  jury:
+    build:
+      context: ./jury
+    container_name: regatta-jury
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-jury:5432/${JURY_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${JURY_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${JURY_DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres-jury:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
 volumes:
   kafka-data:
   postgres-office-data:

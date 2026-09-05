@@ -13,3 +13,4 @@ target/
 Thumbs.db
 
 docs/
+*.env

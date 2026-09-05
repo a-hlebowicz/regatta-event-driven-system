@@ -12,5 +12,6 @@ target/
 .DS_Store
 Thumbs.db
 
+notes/
 docs/
 *.env

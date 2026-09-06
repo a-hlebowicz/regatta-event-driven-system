@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Błąd</title>
+</head>
+<body>
+
+<h1>Coś poszło nie tak</h1>
+
+<p th:if="${status}" th:text="${status} + ' ' + (${error} ?: '')"></p>
+<p th:if="${message}" th:text="${message}"></p>
+
+<a th:href="@{/entries}">Wróć do zgłoszeń</a>
+
+</body>
+</html>

@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,8 +17,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class Entry {
-
-    public static final long INITIAL_VERSION = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +32,7 @@ public class Entry {
     @Column(nullable = false)
     private EntryStatus status;
 
-    // plain field, not @Version; Hibernate would increment that only on flush after the event carrying this version
+    @Version
     @Column(nullable = false)
     private long version;
 }

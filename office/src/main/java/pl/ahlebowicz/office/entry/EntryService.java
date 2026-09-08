@@ -29,9 +29,10 @@ public class EntryService {
         entry.setRegattaId(regattaId);
         entry.setSailNumber(sailNumber);
         entry.setStatus(EntryStatus.ACCEPTED);
-        entry.setVersion(Entry.INITIAL_VERSION);
 
-        Entry accepted = entryRepository.save(entry);
+        // flush before building the event: @Version is settled by the flush,
+        // and the event has to carry the version the row will have after commit
+        Entry accepted = entryRepository.saveAndFlush(entry);
         outboxWriter.write(OfficeTopics.OFFICE_EVENTS, accepted.getRegattaId(), toEvent(accepted));
 
         return accepted;

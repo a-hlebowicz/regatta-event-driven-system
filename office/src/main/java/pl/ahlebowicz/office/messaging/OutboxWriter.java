@@ -19,6 +19,7 @@ public class OutboxWriter {
     public void write(String topic, Long regattaId, Object event) {
         OutboxMessage message = new OutboxMessage();
         message.setTopic(topic);
+        message.setEventType(event.getClass().getSimpleName());
         message.setMessageKey(String.valueOf(regattaId));
         message.setPayload(jsonMapper.writeValueAsString(event));
         message.setCreatedAt(Instant.now());

@@ -4,11 +4,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
 import org.springframework.kafka.core.KafkaTemplate;
 import pl.ahlebowicz.jury.messaging.Topics;
+import pl.ahlebowicz.jury.messaging.inbound.OfficeEventListener;
 import pl.ahlebowicz.jury.replication.CompetitorSnapshotRepository;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,6 +84,18 @@ class EntryReplicationTest {
         });
     }
 
+    @Test
+    void unknownEventType_isIgnoredWithoutBlockingReplication() {
+        publish("RaceClosed", """
+                {"eventId": "%s", "regattaId": 1, "raceId": 7, "version": 1}
+                """.formatted(UUID.randomUUID()));
+
+        publish(entryAccepted(105L, "POL-105", 1L));
+
+        await().atMost(TIMEOUT)
+                .untilAsserted(() -> assertThat(competitorSnapshotRepository.findById(105L)).isPresent());
+    }
+
     private void awaitEveryEarlierRecordProcessed(long markerEntryId) {
         publish(entryAccepted(markerEntryId, "MARKER-" + markerEntryId, 1L));
         await().atMost(TIMEOUT)
@@ -86,7 +103,12 @@ class EntryReplicationTest {
     }
 
     private void publish(String payload) {
-        kafkaTemplate.send(Topics.OFFICE_EVENTS, String.valueOf(REGATTA_ID), payload);
+        publish("EntryAccepted", payload);
+    }
+
+    private void publish(String eventType, String payload) {
+        kafkaTemplate.send(new ProducerRecord<>(Topics.OFFICE_EVENTS, null, String.valueOf(REGATTA_ID), payload,
+                List.of(new RecordHeader(OfficeEventListener.EVENT_TYPE_HEADER, eventType.getBytes(StandardCharsets.UTF_8)))));
     }
 
     private String entryAccepted(long entryId, String sailNumber, long version) {

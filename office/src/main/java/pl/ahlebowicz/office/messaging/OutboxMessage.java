@@ -25,6 +25,9 @@ public class OutboxMessage {
     private String topic;
 
     @Column(nullable = false)
+    private String eventType;
+
+    @Column(nullable = false)
     private String messageKey;
 
     @Column(nullable = false)

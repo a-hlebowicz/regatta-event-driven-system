@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.ahlebowicz.office.competitor.Competitor;
 import pl.ahlebowicz.office.competitor.CompetitorService;
 import pl.ahlebowicz.office.exception.ConflictException;
+import pl.ahlebowicz.office.exception.NotFoundException;
 import pl.ahlebowicz.office.messaging.OfficeTopics;
 import pl.ahlebowicz.office.messaging.OutboxWriter;
 import pl.ahlebowicz.office.messaging.outbound.EntryAccepted;
+import pl.ahlebowicz.office.messaging.outbound.EntryWithdrawn;
 import pl.ahlebowicz.office.regatta.Regatta;
 import pl.ahlebowicz.office.regatta.RegattaService;
 
@@ -50,8 +52,37 @@ public class EntryService {
         return accepted;
     }
 
+    @Transactional
+    public Entry withdrawEntry(Long regattaId, Long entryId) {
+        Entry entry = entryRepository.findById(entryId)
+                .orElseThrow(() -> new NotFoundException("Nie ma zgłoszenia o numerze " + entryId));
+
+        if (!entry.getRegatta().getId().equals(regattaId)) {
+            throw new NotFoundException("Zgłoszenie " + entryId + " nie należy do tych regat");
+        }
+
+        if (entry.getStatus() == EntryStatus.WITHDRAWN) {
+            throw new ConflictException("Zgłoszenie " + entry.getSailNumber() + " jest już wycofane");
+        }
+
+        entry.setStatus(EntryStatus.WITHDRAWN);
+
+        Entry withdrawn = entryRepository.saveAndFlush(entry);
+        outboxWriter.write(OfficeTopics.OFFICE_EVENTS, regattaId, toEvent(withdrawn));
+
+        return withdrawn;
+    }
+
     public List<EntryRow> listEntries(Long regattaId) {
         return entryRepository.findRowsForRegatta(regattaId);
+    }
+
+    private EntryWithdrawn toEvent(Entry entry) {
+        return new EntryWithdrawn(UUID.randomUUID().toString(),
+                entry.getRegatta().getId(),
+                entry.getId(),
+                entry.getVersion(),
+                Instant.now());
     }
 
     private EntryAccepted toEvent(Entry entry, Competitor competitor) {

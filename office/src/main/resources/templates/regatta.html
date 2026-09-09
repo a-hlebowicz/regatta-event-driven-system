@@ -36,6 +36,7 @@
         <th>Klub</th>
         <th>Status</th>
         <th class="numeric">Wersja</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
@@ -45,9 +46,16 @@
         <td th:text="${entry.club}"></td>
         <td th:text="${entry.status}"></td>
         <td class="numeric" th:text="${entry.version}"></td>
+        <td>
+            <form th:if="${entry.status.name() != 'WITHDRAWN'}"
+                  th:action="@{/regattas/{regattaId}/entries/{entryId}/withdraw(regattaId=${regatta.id},entryId=${entry.id})}"
+                  method="post">
+                <button type="submit">Wycofaj</button>
+            </form>
+        </td>
     </tr>
     <tr th:if="${entries.isEmpty()}">
-        <td colspan="5" class="empty">Brak zgłoszeń</td>
+        <td colspan="6" class="empty">Brak zgłoszeń</td>
     </tr>
     </tbody>
 </table>

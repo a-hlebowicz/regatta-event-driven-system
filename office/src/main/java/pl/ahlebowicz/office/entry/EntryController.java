@@ -26,4 +26,11 @@ public class EntryController {
 
         return "redirect:/regattas/" + regattaId;
     }
+
+    @PostMapping("/{entryId}/withdraw")
+    public String withdrawEntry(@PathVariable Long regattaId, @PathVariable Long entryId) {
+        entryService.withdrawEntry(regattaId, entryId);
+
+        return "redirect:/regattas/" + regattaId;
+    }
 }

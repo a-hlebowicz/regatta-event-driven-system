@@ -31,6 +31,9 @@ public class Entry {
     private Regatta regatta;
 
     @Column(nullable = false)
+    private Long competitorId;
+
+    @Column(nullable = false)
     private String sailNumber;
 
     @Enumerated(EnumType.STRING)

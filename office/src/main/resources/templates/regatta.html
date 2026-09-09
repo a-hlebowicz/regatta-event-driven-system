@@ -7,7 +7,7 @@
 </head>
 <body>
 
-<nav><a th:href="@{/regattas}">Regaty</a></nav>
+<nav><a th:href="@{/regattas}">Regaty</a> | <a th:href="@{/competitors}">Zawodnicy</a></nav>
 
 <h1 th:text="${regatta.name}">Regaty</h1>
 
@@ -32,6 +32,8 @@
     <thead>
     <tr>
         <th>Numer na żaglu</th>
+        <th>Zawodnik</th>
+        <th>Klub</th>
         <th>Status</th>
         <th class="numeric">Wersja</th>
     </tr>
@@ -39,16 +41,27 @@
     <tbody>
     <tr th:each="entry : ${entries}">
         <td th:text="${entry.sailNumber}"></td>
+        <td th:text="${entry.competitorName()}"></td>
+        <td th:text="${entry.club}"></td>
         <td th:text="${entry.status}"></td>
         <td class="numeric" th:text="${entry.version}"></td>
     </tr>
     <tr th:if="${entries.isEmpty()}">
-        <td colspan="3" class="empty">Brak zgłoszeń</td>
+        <td colspan="5" class="empty">Brak zgłoszeń</td>
     </tr>
     </tbody>
 </table>
 
 <form th:action="@{/regattas/{id}/entries(id=${regatta.id})}" th:object="${entryForm}" method="post">
+    <label>
+        <span>Zawodnik</span>
+        <select th:field="*{competitorId}">
+            <option value="">wybierz zawodnika</option>
+            <option th:each="competitor : ${competitors}"
+                    th:value="${competitor.id}"
+                    th:text="${competitor.fullName()} + ' (' + ${competitor.club} + ')'"></option>
+        </select>
+    </label>
     <label>
         <span>Numer na żaglu</span>
         <input type="text" th:field="*{sailNumber}">

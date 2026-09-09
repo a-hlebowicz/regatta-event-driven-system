@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import pl.ahlebowicz.office.competitor.CompetitorService;
 import pl.ahlebowicz.office.entry.CreateEntryRequest;
 import pl.ahlebowicz.office.entry.EntryService;
 
@@ -20,6 +21,7 @@ public class RegattaController {
 
     private final RegattaService regattaService;
     private final EntryService entryService;
+    private final CompetitorService competitorService;
 
     @GetMapping
     public String listRegattas(Model model) {
@@ -45,6 +47,7 @@ public class RegattaController {
     public String showRegatta(@PathVariable Long regattaId, Model model) {
         model.addAttribute("regatta", regattaService.getRegattaDetails(regattaId));
         model.addAttribute("entries", entryService.listEntries(regattaId));
+        model.addAttribute("competitors", competitorService.listCompetitors());
         model.addAttribute("entryForm", CreateEntryRequest.empty());
 
         return "regatta";

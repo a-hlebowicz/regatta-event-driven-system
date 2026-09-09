@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Zawodnicy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<nav><a th:href="@{/regattas}">Regaty</a> | <a th:href="@{/competitors}">Zawodnicy</a></nav>
+
+<h1>Zawodnicy</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Nazwisko i imię</th>
+        <th>Klub</th>
+        <th>Numer licencji</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="competitor : ${competitors}">
+        <td th:text="${competitor.lastName} + ' ' + ${competitor.firstName}"></td>
+        <td th:text="${competitor.club}"></td>
+        <td th:text="${competitor.licenceNumber}"></td>
+    </tr>
+    <tr th:if="${competitors.isEmpty()}">
+        <td colspan="3" class="empty">Brak zawodników</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Nowy zawodnik</h2>
+
+<form th:action="@{/competitors}" th:object="${competitorForm}" method="post">
+    <label>
+        <span>Imię</span>
+        <input type="text" th:field="*{firstName}">
+        <span class="error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+    </label>
+    <label>
+        <span>Nazwisko</span>
+        <input type="text" th:field="*{lastName}">
+        <span class="error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+    </label>
+    <label>
+        <span>Klub</span>
+        <input type="text" th:field="*{club}">
+        <span class="error" th:if="${#fields.hasErrors('club')}" th:errors="*{club}"></span>
+    </label>
+    <label>
+        <span>Numer licencji</span>
+        <input type="text" th:field="*{licenceNumber}">
+        <span class="error" th:if="${#fields.hasErrors('licenceNumber')}" th:errors="*{licenceNumber}"></span>
+    </label>
+    <button type="submit">Zarejestruj</button>
+</form>
+
+</body>
+</html>

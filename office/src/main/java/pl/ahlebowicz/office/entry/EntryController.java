@@ -20,11 +20,9 @@ public class EntryController {
     public String acceptEntry(@PathVariable Long regattaId,
                               @Valid @ModelAttribute("entryForm") CreateEntryRequest form,
                               BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            return "redirect:/regattas/" + regattaId;
+        if (!bindingResult.hasErrors()) {
+            entryService.acceptEntry(regattaId, form);
         }
-
-        entryService.acceptEntry(regattaId, form.sailNumber());
 
         return "redirect:/regattas/" + regattaId;
     }

@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Błąd</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
 
 <h1>Coś poszło nie tak</h1>
 
 <p th:if="${status}" th:text="${status} + ' ' + (${error} ?: '')"></p>
-<p th:if="${message}" th:text="${message}"></p>
+<p class="error" th:if="${message}" th:text="${message}"></p>
 
-<a th:href="@{/entries}">Wróć do zgłoszeń</a>
+<a th:href="@{/regattas}">Wróć do listy regat</a>
 
 </body>
 </html>

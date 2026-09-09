@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${regatta.name}">Regaty</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<nav><a th:href="@{/regattas}">Regaty</a></nav>
+
+<h1 th:text="${regatta.name}">Regaty</h1>
+
+<dl>
+    <dt>Miejsce</dt>
+    <dd th:text="${regatta.venue}"></dd>
+    <dt>Klasa łódek</dt>
+    <dd th:text="${regatta.boatClass}"></dd>
+    <dt>Termin</dt>
+    <dd th:text="${regatta.startDate} + ' do ' + ${regatta.endDate}"></dd>
+    <dt>Limit na protest</dt>
+    <dd th:text="${regatta.protestTimeLimitMinutes} + ' minut od zamknięcia wyścigu'"></dd>
+    <dt>Progi odrzutów</dt>
+    <dd th:text="${regatta.discardThresholds.isEmpty()} ? 'brak odrzutów' : ${#strings.listJoin(regatta.discardThresholds, ', ')}"></dd>
+    <dt>Status</dt>
+    <dd th:text="${regatta.status}"></dd>
+</dl>
+
+<h2>Zgłoszenia</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Numer na żaglu</th>
+        <th>Status</th>
+        <th class="numeric">Wersja</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${entries}">
+        <td th:text="${entry.sailNumber}"></td>
+        <td th:text="${entry.status}"></td>
+        <td class="numeric" th:text="${entry.version}"></td>
+    </tr>
+    <tr th:if="${entries.isEmpty()}">
+        <td colspan="3" class="empty">Brak zgłoszeń</td>
+    </tr>
+    </tbody>
+</table>
+
+<form th:action="@{/regattas/{id}/entries(id=${regatta.id})}" th:object="${entryForm}" method="post">
+    <label>
+        <span>Numer na żaglu</span>
+        <input type="text" th:field="*{sailNumber}">
+    </label>
+    <button type="submit">Dodaj zgłoszenie</button>
+</form>
+
+</body>
+</html>

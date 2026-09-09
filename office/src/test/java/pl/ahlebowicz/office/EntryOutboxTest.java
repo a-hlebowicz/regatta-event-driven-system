@@ -8,8 +8,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 import pl.ahlebowicz.office.entry.EntryRepository;
 import pl.ahlebowicz.office.entry.EntryService;
 import pl.ahlebowicz.office.messaging.OutboxMessageRepository;
+import pl.ahlebowicz.office.regatta.CreateRegattaRequest;
+import pl.ahlebowicz.office.regatta.RegattaService;
 
 import java.time.Duration;
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -24,6 +27,9 @@ class EntryOutboxTest {
     private EntryService entryService;
 
     @Autowired
+    private RegattaService regattaService;
+
+    @Autowired
     private EntryRepository entryRepository;
 
     @Autowired
@@ -34,11 +40,12 @@ class EntryOutboxTest {
 
     @Test
     void acceptEntry_writesEntryAndEventInOneTransaction() {
+        Long regattaId = createRegatta("Puchar Zatoki");
         long entriesBefore = entryRepository.count();
         long messagesBefore = outboxMessageRepository.count();
 
         transactionTemplate.execute(status -> {
-            entryService.acceptEntry(11L, "POL-11");
+            entryService.acceptEntry(regattaId, "POL-11");
             status.setRollbackOnly();
             return null;
         });
@@ -49,9 +56,16 @@ class EntryOutboxTest {
 
     @Test
     void acceptedEntry_isPublishedAndStamped() {
-        entryService.acceptEntry(12L, "POL-12");
+        Long regattaId = createRegatta("Regaty Jesienne");
+
+        entryService.acceptEntry(regattaId, "POL-12");
 
         await().atMost(TIMEOUT)
                 .untilAsserted(() -> assertThat(outboxMessageRepository.findTop100BySentAtIsNullOrderByIdAsc()).isEmpty());
+    }
+
+    private Long createRegatta(String name) {
+        return regattaService.createRegatta(new CreateRegattaRequest(name, "Gdynia", "Optimist",
+                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 3), 60, "4, 8")).getId();
     }
 }

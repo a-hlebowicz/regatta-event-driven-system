@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Regaty</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<h1>Biuro Regat</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Nazwa</th>
+        <th>Miejsce</th>
+        <th>Klasa</th>
+        <th>Termin</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="regatta : ${regattas}">
+        <td><a th:href="@{/regattas/{id}(id=${regatta.id})}" th:text="${regatta.name}"></a></td>
+        <td th:text="${regatta.venue}"></td>
+        <td th:text="${regatta.boatClass}"></td>
+        <td th:text="${regatta.startDate} + ' do ' + ${regatta.endDate}"></td>
+        <td th:text="${regatta.status}"></td>
+    </tr>
+    <tr th:if="${regattas.isEmpty()}">
+        <td colspan="5" class="empty">Brak regat</td>
+    </tr>
+    </tbody>
+</table>
+
+<h2>Nowe regaty</h2>
+
+<form th:action="@{/regattas}" th:object="${regattaForm}" method="post">
+    <label>
+        <span>Nazwa</span>
+        <input type="text" th:field="*{name}">
+        <span class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+    </label>
+    <label>
+        <span>Miejsce</span>
+        <input type="text" th:field="*{venue}">
+        <span class="error" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></span>
+    </label>
+    <label>
+        <span>Klasa łódek</span>
+        <input type="text" th:field="*{boatClass}">
+        <span class="error" th:if="${#fields.hasErrors('boatClass')}" th:errors="*{boatClass}"></span>
+    </label>
+    <label>
+        <span>Data rozpoczęcia</span>
+        <input type="date" th:field="*{startDate}">
+        <span class="error" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}"></span>
+    </label>
+    <label>
+        <span>Data zakończenia</span>
+        <input type="date" th:field="*{endDate}">
+        <span class="error" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}"></span>
+    </label>
+    <label>
+        <span>Limit na protest (minuty)</span>
+        <input type="number" th:field="*{protestTimeLimitMinutes}">
+        <span class="error" th:if="${#fields.hasErrors('protestTimeLimitMinutes')}" th:errors="*{protestTimeLimitMinutes}"></span>
+    </label>
+    <label>
+        <span>Progi odrzutów</span>
+        <input type="text" th:field="*{discardThresholds}" placeholder="4, 8">
+    </label>
+    <button type="submit">Załóż regaty</button>
+</form>
+
+</body>
+</html>

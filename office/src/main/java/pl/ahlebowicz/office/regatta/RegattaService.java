@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.ahlebowicz.office.exception.NotFoundException;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -15,7 +14,7 @@ public class RegattaService {
     private final RegattaRepository regattaRepository;
 
     @Transactional
-    public Regatta createRegatta(CreateRegattaRequest request) {
+    public Regatta createRegatta(CreateRegattaRequest request, List<Integer> discardThresholds) {
         Regatta regatta = new Regatta();
         regatta.setName(request.name());
         regatta.setVenue(request.venue());
@@ -24,7 +23,7 @@ public class RegattaService {
         regatta.setEndDate(request.endDate());
         regatta.setProtestTimeLimitMinutes(request.protestTimeLimitMinutes());
         regatta.setStatus(RegattaStatus.PLANNED);
-        regatta.setDiscardThresholds(parseThresholds(request.discardThresholds()));
+        regatta.setDiscardThresholds(discardThresholds);
 
         return regattaRepository.save(regatta);
     }
@@ -46,16 +45,4 @@ public class RegattaService {
                 regatta.getStatus(), List.copyOf(regatta.getDiscardThresholds()));
     }
 
-    private List<Integer> parseThresholds(String thresholds) {
-        if (thresholds == null || thresholds.isBlank()) {
-            return List.of();
-        }
-
-        return Arrays.stream(thresholds.split(","))
-                .map(String::trim)
-                .filter(threshold -> !threshold.isEmpty())
-                .map(Integer::valueOf)
-                .sorted()
-                .toList();
-    }
 }

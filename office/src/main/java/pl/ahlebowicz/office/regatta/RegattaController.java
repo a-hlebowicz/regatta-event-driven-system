@@ -10,9 +10,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Arrays;
+import java.util.List;
 import pl.ahlebowicz.office.competitor.CompetitorService;
 import pl.ahlebowicz.office.entry.CreateEntryRequest;
 import pl.ahlebowicz.office.entry.EntryService;
+import pl.ahlebowicz.office.exception.ConflictException;
 import pl.ahlebowicz.office.race.RaceService;
 
 @Controller
@@ -40,9 +44,26 @@ public class RegattaController {
             return "regattas";
         }
 
-        regattaService.createRegatta(form);
+        regattaService.createRegatta(form, toThresholds(form.discardThresholds()));
 
         return "redirect:/regattas";
+    }
+
+    private List<Integer> toThresholds(String thresholds) {
+        if (thresholds == null || thresholds.isBlank()) {
+            return List.of();
+        }
+
+        try {
+            return Arrays.stream(thresholds.split(","))
+                    .map(String::trim)
+                    .filter(threshold -> !threshold.isEmpty())
+                    .map(Integer::valueOf)
+                    .sorted()
+                    .toList();
+        } catch (NumberFormatException exception) {
+            throw new ConflictException("Progi odrzutów podaje się jako liczby rozdzielone przecinkami, na przykład: 4, 8");
+        }
     }
 
     @GetMapping("/{regattaId}")

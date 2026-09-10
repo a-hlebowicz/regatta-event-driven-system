@@ -16,6 +16,7 @@ import pl.ahlebowicz.office.regatta.RegattaService;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -79,6 +80,6 @@ class EntryOutboxTest {
 
     private Long createRegatta(String name) {
         return regattaService.createRegatta(new CreateRegattaRequest(name, "Gdynia", "Optimist",
-                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 3), 60, "4, 8")).getId();
+                LocalDate.of(2026, 6, 1), LocalDate.of(2026, 6, 3), 60, "4, 8"), List.of(4, 8)).getId();
     }
 }

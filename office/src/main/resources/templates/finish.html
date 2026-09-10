@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Meta</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<nav>
+    <a th:href="@{/regattas}">Regaty</a> |
+    <a th:href="@{/regattas/{id}(id=${regatta.id})}" th:text="${regatta.name}"></a>
+</nav>
+
+<h1 th:text="'Meta wyścigu ' + ${race.raceNumber}">Meta</h1>
+
+<form th:action="@{/regattas/{regattaId}/races/{raceId}/finish(regattaId=${regatta.id},raceId=${race.id})}" method="post">
+    <table>
+        <thead>
+        <tr>
+            <th>Numer na żaglu</th>
+            <th>Zawodnik</th>
+            <th>Kod</th>
+            <th class="numeric">Pozycja</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="finish : ${finishes}">
+            <td th:text="${finish.sailNumber}"></td>
+            <td th:text="${finish.competitorName}"></td>
+            <td>
+                <input type="hidden" name="entryId" th:value="${finish.entryId}">
+                <select name="code">
+                    <option th:each="code : ${codes}" th:value="${code}" th:text="${code}"
+                            th:selected="${code == finish.code}"></option>
+                </select>
+            </td>
+            <td class="numeric">
+                <input type="number" name="position" min="1" th:value="${finish.position}">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="empty">Pozycję wypełnia się tylko dla kodu FINISHED; przy pozostałych kodach zostaw pole puste.</p>
+
+    <button type="submit">Zamknij wyścig</button>
+</form>
+
+</body>
+</html>

@@ -26,6 +26,43 @@
     <dd th:text="${regatta.status}"></dd>
 </dl>
 
+<h2>Wyścigi</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th class="numeric">Numer</th>
+        <th>Planowany start</th>
+        <th>Status</th>
+        <th>Zamknięty</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="race : ${races}">
+        <td class="numeric" th:text="${race.raceNumber}"></td>
+        <td th:text="${race.plannedStart}"></td>
+        <td th:text="${race.status}"></td>
+        <td th:text="${race.closedAt}"></td>
+        <td>
+            <a th:href="@{/regattas/{regattaId}/races/{raceId}/finish(regattaId=${regatta.id},raceId=${race.id})}"
+               th:text="${race.status.name() == 'CLOSED'} ? 'Wyniki' : 'Wpisz metę'"></a>
+        </td>
+    </tr>
+    <tr th:if="${races.isEmpty()}">
+        <td colspan="5" class="empty">Brak wyścigów</td>
+    </tr>
+    </tbody>
+</table>
+
+<form th:action="@{/regattas/{id}/races(id=${regatta.id})}" method="post">
+    <label>
+        <span>Planowany start</span>
+        <input type="datetime-local" name="plannedStart" required>
+    </label>
+    <button type="submit">Dodaj wyścig</button>
+</form>
+
 <h2>Zgłoszenia</h2>
 
 <table>

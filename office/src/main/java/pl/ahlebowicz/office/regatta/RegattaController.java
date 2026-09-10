@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import pl.ahlebowicz.office.competitor.CompetitorService;
 import pl.ahlebowicz.office.entry.CreateEntryRequest;
 import pl.ahlebowicz.office.entry.EntryService;
+import pl.ahlebowicz.office.race.RaceService;
 
 @Controller
 @RequestMapping("/regattas")
@@ -22,6 +23,7 @@ public class RegattaController {
     private final RegattaService regattaService;
     private final EntryService entryService;
     private final CompetitorService competitorService;
+    private final RaceService raceService;
 
     @GetMapping
     public String listRegattas(Model model) {
@@ -49,6 +51,7 @@ public class RegattaController {
         model.addAttribute("entries", entryService.listEntries(regattaId));
         model.addAttribute("competitors", competitorService.listCompetitors());
         model.addAttribute("entryForm", CreateEntryRequest.empty());
+        model.addAttribute("races", raceService.listRaces(regattaId));
 
         return "regatta";
     }

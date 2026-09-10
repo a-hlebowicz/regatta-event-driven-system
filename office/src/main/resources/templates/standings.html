@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Klasyfikacja</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<nav>
+    <a th:href="@{/regattas}">Regaty</a> |
+    <a th:href="@{/regattas/{id}(id=${regatta.id})}" th:text="${regatta.name}"></a>
+</nav>
+
+<h1>Klasyfikacja generalna</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th class="numeric">Miejsce</th>
+        <th>Numer na żaglu</th>
+        <th>Zawodnik</th>
+        <th>Klub</th>
+        <th class="numeric" th:each="raceNumber : ${standings.raceNumbers}" th:text="'W' + ${raceNumber}"></th>
+        <th class="numeric">Punkty</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="row : ${standings.rows}">
+        <td class="numeric" th:text="${row.rank}"></td>
+        <td th:text="${row.sailNumber}"></td>
+        <td th:text="${row.competitorName}"></td>
+        <td th:text="${row.club}"></td>
+        <td class="numeric" th:each="points : ${row.racePoints}"
+            th:text="${points.discarded} ? '(' + ${points.points} + ')' : ${points.points}"
+            th:classappend="${points.discarded} ? 'discarded' : ''"></td>
+        <td class="numeric" th:text="${row.total}"></td>
+    </tr>
+    <tr th:if="${standings.rows.isEmpty()}">
+        <td colspan="5" class="empty">Brak zgłoszeń</td>
+    </tr>
+    </tbody>
+</table>
+
+<p class="empty" th:if="${!standings.raceNumbers.isEmpty()}">
+    Wynik w nawiasie to odrzut; nie liczy się do sumy.
+</p>
+<p class="empty" th:if="${standings.raceNumbers.isEmpty()}">
+    Żaden wyścig nie został jeszcze zamknięty.
+</p>
+
+</body>
+</html>

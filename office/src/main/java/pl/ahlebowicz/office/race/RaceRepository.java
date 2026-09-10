@@ -22,4 +22,12 @@ public interface RaceRepository extends JpaRepository<Race, Long> {
 
     @Query("select r from Race r left join fetch r.finishes where r.id = :raceId")
     Optional<Race> findByIdWithFinishes(@Param("raceId") Long raceId);
+
+    @Query("""
+            select distinct r from Race r
+            left join fetch r.finishes
+            where r.regatta.id = :regattaId and r.status = pl.ahlebowicz.office.race.RaceStatus.CLOSED
+            order by r.raceNumber
+            """)
+    List<Race> findClosedWithFinishes(@Param("regattaId") Long regattaId);
 }

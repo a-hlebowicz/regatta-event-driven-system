@@ -7,7 +7,11 @@
 </head>
 <body>
 
-<nav><a th:href="@{/regattas}">Regaty</a> | <a th:href="@{/competitors}">Zawodnicy</a></nav>
+<nav>
+    <a th:href="@{/regattas}">Regaty</a> |
+    <a th:href="@{/competitors}">Zawodnicy</a> |
+    <a th:href="@{/regattas/{id}/standings(id=${regatta.id})}">Klasyfikacja</a>
+</nav>
 
 <h1 th:text="${regatta.name}">Regaty</h1>
 

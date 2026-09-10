@@ -83,6 +83,10 @@ button {
     font-size: 0.9rem;
 }
 
+td.discarded {
+    color: #888;
+}
+
 .provisional {
     background: #fff4d6;
 }

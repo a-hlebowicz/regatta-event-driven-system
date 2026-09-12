@@ -25,6 +25,7 @@ class EntryReplicationTest {
 
     private static final Duration TIMEOUT = Duration.ofSeconds(20);
     private static final long REGATTA_ID = 1L;
+    private static final String COMPETITOR_NAME = "Anna Kowalska";
 
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
@@ -39,7 +40,10 @@ class EntryReplicationTest {
         await().atMost(TIMEOUT).untilAsserted(() -> assertThat(competitorSnapshotRepository.findById(101L))
                 .hasValueSatisfying(snapshot -> {
                     assertThat(snapshot.getRegattaId()).isEqualTo(REGATTA_ID);
+                    assertThat(snapshot.getCompetitorId()).isEqualTo(601L);
+                    assertThat(snapshot.getCompetitorName()).isEqualTo(COMPETITOR_NAME);
                     assertThat(snapshot.getSailNumber()).isEqualTo("POL-101");
+                    assertThat(snapshot.isActive()).isTrue();
                     assertThat(snapshot.getVersion()).isEqualTo(1L);
                 }));
     }
@@ -86,7 +90,7 @@ class EntryReplicationTest {
 
     @Test
     void unknownEventType_isIgnoredWithoutBlockingReplication() {
-        publish("RaceClosed", """
+        publish("RaceAbandoned", """
                 {"eventId": "%s", "regattaId": 1, "raceId": 7, "version": 1}
                 """.formatted(UUID.randomUUID()));
 
@@ -94,6 +98,36 @@ class EntryReplicationTest {
 
         await().atMost(TIMEOUT)
                 .untilAsserted(() -> assertThat(competitorSnapshotRepository.findById(105L)).isPresent());
+    }
+
+    @Test
+    void entryWithdrawn_deactivatesSnapshotWithoutRemovingIt() {
+        publish(entryAccepted(106L, "POL-106", 1L));
+        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(competitorSnapshotRepository.findById(106L)).isPresent());
+
+        publish("EntryWithdrawn", entryWithdrawn(106L, 2L));
+        awaitEveryEarlierRecordProcessed(906L);
+
+        assertThat(competitorSnapshotRepository.findById(106L)).hasValueSatisfying(snapshot -> {
+            assertThat(snapshot.isActive()).isFalse();
+            assertThat(snapshot.getSailNumber()).isEqualTo("POL-106");
+            assertThat(snapshot.getVersion()).isEqualTo(2L);
+        });
+    }
+
+    @Test
+    void entryWithdrawn_beforeAcceptance_leavesEntryInactive() {
+        publish("EntryWithdrawn", entryWithdrawn(107L, 2L));
+        await().atMost(TIMEOUT).untilAsserted(() -> assertThat(competitorSnapshotRepository.findById(107L)).isPresent());
+
+        publish(entryAccepted(107L, "POL-107", 1L));
+        awaitEveryEarlierRecordProcessed(907L);
+
+        assertThat(competitorSnapshotRepository.findById(107L)).hasValueSatisfying(snapshot -> {
+            assertThat(snapshot.isActive()).isFalse();
+            assertThat(snapshot.getSailNumber()).isNull();
+            assertThat(snapshot.getVersion()).isEqualTo(2L);
+        });
     }
 
     private void awaitEveryEarlierRecordProcessed(long markerEntryId) {
@@ -117,10 +151,24 @@ class EntryReplicationTest {
                   "eventId": "%s",
                   "regattaId": %d,
                   "entryId": %d,
+                  "competitorId": %d,
+                  "competitorName": "%s",
                   "sailNumber": "%s",
                   "version": %d,
                   "occurredAt": "2026-09-07T10:15:30Z"
                 }
-                """.formatted(UUID.randomUUID(), REGATTA_ID, entryId, sailNumber, version);
+                """.formatted(UUID.randomUUID(), REGATTA_ID, entryId, entryId + 500, COMPETITOR_NAME, sailNumber, version);
+    }
+
+    private String entryWithdrawn(long entryId, long version) {
+        return """
+                {
+                  "eventId": "%s",
+                  "regattaId": %d,
+                  "entryId": %d,
+                  "version": %d,
+                  "occurredAt": "2026-09-07T11:20:00Z"
+                }
+                """.formatted(UUID.randomUUID(), REGATTA_ID, entryId, version);
     }
 }

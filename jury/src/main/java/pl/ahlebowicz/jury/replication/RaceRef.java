@@ -2,31 +2,36 @@ package pl.ahlebowicz.jury.replication;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-public class CompetitorSnapshot {
+public class RaceRef {
 
     @Id
-    private Long entryId;
+    private Long raceId;
 
     @Column(nullable = false)
     private Long regattaId;
 
-    private Long competitorId;
+    private Integer raceNumber;
 
-    private String competitorName;
-
-    private String sailNumber;
-
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean active;
+    private RaceRefStatus status;
+
+    private Instant closedAt;
+
+    private Integer protestTimeLimitMinutes;
 
     @Column(nullable = false)
     private long version;
